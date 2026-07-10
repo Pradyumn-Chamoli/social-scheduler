@@ -29,7 +29,7 @@ const Dashboard = () => {
         })
         setActivities(activityRes.data);
       }catch(error){
-        console.error("Error fetchind dashboard data" , error)
+        console.error("Error fetching dashboard data" , error)
       }
     };
     fetchDashboardData();
