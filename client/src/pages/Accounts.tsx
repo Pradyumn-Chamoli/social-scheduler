@@ -7,6 +7,7 @@ import {
 } from "../assets/assets";
 
 import AccountList from "../components/AccountList";
+import PlatformPickerModal from "../components/PlatformPickerModal";
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -74,7 +75,9 @@ const Accounts = () => {
 
 
       {/* Platform picker model */}
-      
+      {showPlatformPicker && <PlatformPickerModal  connectedIds={connectedIds} connecting={connecting}
+       onClose={()=> setShowPlatformPicker(false)} onConnect={handleConnect}/>}
+
 
 
 
