@@ -72,6 +72,12 @@ const Accounts = () => {
 
       </div>
 
+
+      {/* Platform picker model */}
+      
+
+
+
       {/* Connected Accounts List */}
 
       <AccountList
