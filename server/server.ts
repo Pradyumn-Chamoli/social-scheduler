@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from "cors";
 import { connect } from "node:http2";
 import connectDB from "./config/db.js";
@@ -20,6 +20,12 @@ app.get('/', (_req: Request, res: Response) => {
     res.send('Server is Live!');
 });
 
+//Global error handler
+app.use((err: any , _req:Request , res:Response , _next: NextFunction)=>{
+    console.log(err);
+    res.status(500).send(err?.response?.data?.message || err?.messgae);
+
+})
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
