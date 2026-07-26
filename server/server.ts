@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import cors from "cors";
 import { connect } from "node:http2";
 import connectDB from "./config/db.js";
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -19,6 +20,9 @@ const port = process.env.PORT || 3000;
 app.get('/', (_req: Request, res: Response) => {
     res.send('Server is Live!');
 });
+
+app.use("/api/auth" , authRouter);
+
 
 //Global error handler
 app.use((err: any , _req:Request , res:Response , _next: NextFunction)=>{
