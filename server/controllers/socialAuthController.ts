@@ -1,5 +1,6 @@
 
 import zernio from "../config/zernio.js"
+import { AuthRequest } from "../middlewares/authMiddlewares.js";
 import { Account } from "../models/Account.js";
 import { User } from "../models/User.js";
 import { Request, Response } from "express";
@@ -47,7 +48,7 @@ const getOrCreateZernioProfile = async(user : any) : Promise<string> =>{
 //Generate OAuth authorization URL
 //GET /api/auth/:platform
 
-export const generateAuthUrl  = async (req:Request , res:Response) : Promise<void> =>{
+export const generateAuthUrl  = async (req:AuthRequest , res:Response) : Promise<void> =>{
     try{
         const{platform} = req.params;
         const profileId = await getOrCreateZernioProfile(req.user);
@@ -83,7 +84,7 @@ export const generateAuthUrl  = async (req:Request , res:Response) : Promise<voi
 //Sync connected accounts from zernio into mongoDB
 // GET /api/auth/sync
 
-export const syncAccounts = async(req : Request , res : Response) : Promise<void> =>{
+export const syncAccounts = async(req : AuthRequest , res : Response) : Promise<void> =>{
     try{
         const profileId = await getOrCreateZernioProfile(req.user);
         const result = await zernio.accounts.listAccounts({
