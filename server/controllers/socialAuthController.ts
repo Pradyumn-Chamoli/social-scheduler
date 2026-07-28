@@ -1,5 +1,6 @@
 
 import zernio from "../config/zernio.js"
+import { Account } from "../models/Account.js";
 import { User } from "../models/User.js";
 import { Request, Response } from "express";
 
@@ -75,6 +76,58 @@ export const generateAuthUrl  = async (req:Request , res:Response) : Promise<voi
     }catch(error:any){
         res.status(500).json({message : error?.message || "Server error"});
 
+    }
+}
+
+
+//Sync connected accounts from zernio into mongoDB
+// GET /api/auth/sync
+
+export const syncAccounts = async(req : Request , res : Response) : Promise<void> =>{
+    try{
+        const profileId = await getOrCreateZernioProfile(req.user);
+        const result = await zernio.accounts.listAccounts({
+            query:{profileId} as any
+        })
+
+        const data = result.data as any;
+        const zernioAccounts  : any[] = data?.accounts || (Array.isArray(data)?data : []);
+        const supportedPlatforms = ["twitter" , "linkedin" , "facebook", "instagram"];
+        const syncedAccounts = [];
+
+        for(const zAccount of zernioAccounts){
+            const zid = zAccount._id || zAccount.id;
+            if(!zid){
+                console.warn("Skipping account with no ID:" , zAccount);
+                continue;
+            }
+
+            const rawPlatform  = (zAccount.platform || zAccount.type || "").toLowerCase();
+            const normalizedPlatforms = supportedPlatforms.find((p)=>rawPlatform.includes(p));
+
+            if(!normalizedPlatforms){
+                console.log(`Skipping unsupported platform : "${rawPlatform}`);
+                continue;
+            }
+
+            const account =  await Account.findOneAndUpdate(
+                {zernioAccountId : zid},
+                {
+                    user : req.user._id,
+                    platform : normalizedPlatforms,
+                    handle : zAccount.username || zAccount.name || zAccount.handle || "Unknown" ,
+                    zernioAccountId : zid,
+                    status : "connected",
+                    avatarUrl : zAccount.avatarUrl || zAccount.picture || zAccount.profile_image_url,
+                } ,
+                {upsert:true , returnDocument : 'after'}
+            )
+            syncedAccounts.push(account);
+
+        }
+        res.json(syncedAccounts);
+    }catch(error : any){
+        res.status(500).json({message : error?.message || "Server error"});
     }
 }
 
